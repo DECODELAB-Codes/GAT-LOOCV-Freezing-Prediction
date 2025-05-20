@@ -1,0 +1,38 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.so
+
+# Jupyter checkpoint files
+.ipynb_checkpoints/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Data and output
+*.xlsx
+*.csv
+*.npy
+*.pkl
+*.h5
+*.pt
+*.pth
+*.log
+*.json
+*.zip
+*.tar.gz
+
+# Plots and figures
+*.png
+*.jpg
+*.svg
+*.pdf
+
+# IDE/Editor metadata
+.vscode/
+.idea/
+
+# Conda environment
+.env/
+.venv/
