@@ -2,7 +2,7 @@
 
 This repository contains a full implementation of a **Graph Attention Network (GAT)** model for predicting freezing behavior during fear extinction, using graph representations of single-unit electrophysiological data. The model uses per-neuron features and functional connectivity edge weights to build per-animal graphs and evaluate performance using **Leave-One-Out Cross-Validation (LOOCV)**.
 
-The repository also includes optional **Optuna-based hyperparameter tuning** using 5-fold cross-validation, extensive diagnostic visualizations, and segment-specific prediction pipelines.
+The pipeline is implemented in a single Jupyter Notebook and includes optional **edge attribute integration**, optional **Optuna-based hyperparameter tuning** using 5-fold cross-validation, extensive diagnostic visualizations, and segment-specific prediction pipelines.
 
 ---
 
@@ -18,20 +18,24 @@ GAT-FreezingBehavior-LOOCV/
 ├── LICENSE                        # MIT License for open reuse
 ```
 
+
 ---
 
 ## Inputs
 
-* `neuron_features.xlsx`: Contains per-neuron features (e.g., firing rate, ISI metrics, PC1/PC2 scores) with `Unique ID` indicating animal identity.
-* `edge_weights.xlsx`: Contains normalized mean edge weights between neuron pairs across time windows.
-* `labels.xlsx`: Contains percentage freezing behavior for each animal (`UniqueID`) and group assignment.
+- `neuron_features.xlsx`: Neuron-level features (e.g., firing rate, ISI metrics, PC1/PC2 scores) with `Unique ID` per animal.
+- `edge_weights.xlsx`: Normalized mean edge weights for each neuron pair (first and last 600s).
+- `labels.xlsx`: Animal-level freezing percentages (`UniqueID`) and group label (e.g., control, ELS-Veh, ELS-ACTH).
 
 Each animal is represented as a graph where:
 
-* **Nodes** = neurons
-* **Node features** = electrophysiological and PCA-derived features
-* **Edges** = functional connectivity between neurons (edge weights)
-* **Graph label** = percent freezing (behavioral output)
+| Component      | Description                                  |
+| -------------- | -------------------------------------------- |
+| **Nodes**      | Neurons                                      |
+| **Features**   | Firing rate, ISI metrics, PC scores (per node) |
+| **Edges**      | Functional connectivity (mean dot products)  |
+| **Edge Attr**  | Optional — normalized weights (0–1)          |
+| **Graph Label**| Freezing % (continuous, 0–100)               |
 
 ---
 
@@ -47,18 +51,24 @@ pip install -r requirements.txt
 
 Ensure you have:
 
-* `neuron_features.xlsx`
-* `edge_weights.xlsx`
-* `labels.xlsx`
+* neuron_features_path = "path/to/neuron_features.xlsx"
+* edge_weights_path = "path/to/edge_weights.xlsx"
+* labels_path = "path/to/labels.xlsx"
 
 Update their file paths inside `gat_loocv_model.ipynb`.
 
-### 3. Choose tuning mode
+### 3. Choose GAT Model Type
+
+Toggle this flag to control model architecture:
+
+use_edge_weights = True  # Set False to ignore edge attributes
+
+### 4. Choose tuning mode
 
 * To **manually specify best hyperparameters**, set `run_optuna = False` and use preselected `best_params_*` values.
 * To **run Optuna tuning**, set `run_optuna = True`.
 
-### 4. Run the notebook
+### 5. Run the notebook
 
 Execute all cells sequentially. You can run only the first or last 600s model by toggling:
 
@@ -77,8 +87,8 @@ run_last600 = True
 | Nodes            | Neurons                                                |
 | Node features    | Firing rate, ISI stats, PC1/PC2 scores                 |
 | Edges            | Mean dot products of firing rate vectors               |
-| Edge attributes  | Normalized weights (0–1)                               |
-| Graph label (y)  | Freezing % (continuous)                                |
+| Model 1 (default)| Standard GAT using GATConv                             |
+| Model 2 (opt)    |	Edge-aware GAT using TransformerConv                  |
 | Readout function | `global_mean_pool` followed by sigmoid scaled to 0–100 |
 
 ---
@@ -94,19 +104,20 @@ run_last600 = True
 
 ## Output
 
-* LOOCV-predicted vs. actual plots (group-colored)
-* Per-fold and average training/validation loss curves
-* Aggregated R² values
-* Individual model predictions per animal
+* Prediction vs. actual freezing plots (color-coded by group)
+* Per-fold and average loss curves (training + validation)
+* Aggregated LOOCV R² score
+* Printout of individual predictions for each animal
 
 ---
 
 ## Notes
 
 * **Optuna tuning** performs 5-fold CV and minimizes validation loss minus R².
-* **LOOCV** is used for final generalization testing.
+* **LOOCV** is used for final generalization testing, independent of tuning
 * All features are normalized using `StandardScaler`.
 * Model outputs are squashed using a `sigmoid()` and scaled to 0–100 to match freezing percentage scale.
+* Edge attribute support is optional via use_edge_weights toggle.
 
 ---
 
