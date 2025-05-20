@@ -44,14 +44,19 @@ Each animal is represented as a graph where:
 ### 1. Install dependencies
 
 # Step 1: Install core PyTorch (CPU-only)
+```bash
 pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0
+```
 
 # Step 2: Install torch-geometric for PyTorch 2.2.0 (CPU-only)
+```bash
 pip install torch-geometric -f https://data.pyg.org/whl/torch-2.2.0+cpu.html
+```
 
 # Step 3: Install project dependencies
+```bash
 pip install -r requirements.txt
-
+```
 
 ### 2. Prepare input files
 
